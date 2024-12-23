@@ -7,6 +7,7 @@
 stbi_uc* autoWhiteBalance(stbi_uc* input_image, int width, int height, int channels);
 __global__ void autoWhiteBalanceSumKernel(stbi_uc* input_image, int width, int height, int channels, unsigned long long* sum_R, unsigned long long* sum_G, unsigned long long* sum_B);
 __global__ void autoWhiteBalanceApplyKernel(stbi_uc* input_image, stbi_uc* output_image, int width, int height, int channels, float r_gain, float b_gain);
+void autoWhiteBalance(uint8_t* rgb_buf, uint32_t width, uint32_t height);
 
 stbi_uc* autoWhiteBalance(stbi_uc* input_image, int width, int height, int channels) {
     int image_size = channels * width * height * sizeof(stbi_uc);
@@ -84,6 +85,38 @@ __global__ void autoWhiteBalanceApplyKernel(stbi_uc* input_image, stbi_uc* outpu
         output_image[idx] = (stbi_uc)clamp((input_image[idx] * r_gain), 0.0f, 255.0f);
         output_image[idx + 1] = (stbi_uc)clamp((input_image[idx + 1]), 0.0f, 255.0f);
         output_image[idx + 2] = (stbi_uc)clamp((input_image[idx + 2] * b_gain), 0.0f, 255.0f);
+    }
+}
+
+void autoWhiteBalance(uint8_t* rgb_buf, uint32_t width, uint32_t height) {
+    uint32_t image_size = width * height;
+    uint64_t r_sum = 0, g_sum = 0, b_sum = 0;
+
+    // Calculate the sum of each channel
+    for (uint32_t i = 0; i < image_size; i++) {
+        r_sum += rgb_buf[3 * i];
+        g_sum += rgb_buf[3 * i + 1];
+        b_sum += rgb_buf[3 * i + 2];
+    }
+
+    // Compute average intensity for each color channel
+    float r_avg = r_sum / (float)image_size;
+    float g_avg = g_sum / (float)image_size;
+    float b_avg = b_sum / (float)image_size;
+
+    // Calculate gain for each channel to match the green channel
+    float r_gain = g_avg / r_avg;
+    float b_gain = g_avg / b_avg;
+
+    // Apply the white balance gains
+    for (uint32_t i = 0; i < image_size; i++) {
+        int r = rgb_buf[3 * i];
+        int g = rgb_buf[3 * i + 1];
+        int b = rgb_buf[3 * i + 2];
+
+        rgb_buf[3 * i] = (uint8_t)clamp_cpu(r * r_gain, 0, 255);
+        rgb_buf[3 * i + 1] = (uint8_t)clamp_cpu(g, 0, 255);         // No adjustment for green
+        rgb_buf[3 * i + 2] = (uint8_t)clamp_cpu(b * b_gain, 0, 255);
     }
 }
 

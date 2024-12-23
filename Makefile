@@ -7,6 +7,9 @@ NVCC_FLAGS = -std=c++11 -O3
 # Executable name
 EXEC = cuda-isp
 
+# Linker flags
+LDFLAGS = -lm
+
 # Source files
 SRC = main.cu
 
@@ -19,8 +22,9 @@ OBJ = $(SRC:.cu=.o)
 # Target to build the executable
 all: $(EXEC)
 
+# Compile the executable
 $(EXEC): $(SRC)
-	$(NVCC) $(INCLUDES) -o $@ $^
+	$(NVCC) $(NVCC_FLAGS) $(INCLUDES) -o $@ $^ $(LDFLAGS)
 
 # Clean up build files
 clean:

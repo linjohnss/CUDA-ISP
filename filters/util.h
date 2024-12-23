@@ -50,4 +50,17 @@ __device__ uint8_t clamp(float value, float min, float max) {
     return (uint8_t)value;
 }
 
+uint8_t clamp_cpu(float value, float min, float max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return (uint8_t)value;
+}
+
+__device__ void swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+
 #endif
