@@ -1,4 +1,9 @@
 # CUDA-ISP
+
+2024 NYCU PP Final Project
+
+Authors: Ching-Yang Lin, Ying-Huan Chen, Chung-Ho Wu
+
 ![Pipeline](assets/cuda_isp_pipeline.png)
 
 CUDA-ISP (Image Signal Processing) is a high-performance image processing pipeline designed for CUDA-enabled GPUs. This repository provides a flexible framework for performing various image processing tasks, such as degradation, CPU-based processing, and GPU-accelerated processing.
